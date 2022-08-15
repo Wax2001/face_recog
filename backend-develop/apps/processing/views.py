@@ -1,107 +1,49 @@
 import datetime
-from django.views.generic import ListView
 from apps.processing.models import *
 
-from rest_framework import serializers, views, viewsets, status
+from rest_framework import viewsets, status, mixins
+from rest_framework.decorators import action
 from rest_framework import permissions
-from apps.processing.serializers import RecordSerializer, UserSerializer
-from rest_framework.authentication import BaseAuthentication, TokenAuthentication
+from apps.processing.serializers import RecordSerializer, UserApproveSerializer, NotApprovedUsersSerializer
 
 from rest_framework.response import Response
 
 from apps.processing import logger
 
-class HomepageListView(ListView):
-    template_name = 'index.html'
-    model = Record
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        records = Record.objects.filter(available=True).order_by('-id')
-        users = User.objects.filter(available=True).order_by('-id')
-        context = {
-            'records': records,
-            'users': users,
-        }
-        return context
-
-class DashboardListView(ListView):
-    template_name = 'dashboard.html'
-    model = User
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        users = User.objects.exclude(working_hours=None, salary=None)
-        n_users = User.objects.filter(available=True).count()
-        n_reports = Record.objects.filter(available=True).count()
-
-        avg_work_hours = self.compute_avg_work_hours(users, users.count())
-        avg_hourly_rate = self.compute_avg_hourly_rate(users, users.count())
-
-        late_arrived_users = Record.objects.exclude(late_arrive_time=None)
-        early_left_users = Record.objects.exclude(early_leave_time=None)
-
-        context = {
-            'users': users,
-            'n_users': n_users,
-            'n_reports': n_reports,
-            'avg_work_hours': avg_work_hours,
-            'avg_hourly_rate': avg_hourly_rate,
-            'late_reports': late_arrived_users,
-            'early_reports': early_left_users, 
-            }
-        logger.info(f'{n_users}')
-        return context
-
-    def compute_avg_work_hours(self, users=None, n_users=1):
-        logger.info(f'users considered in stats: {users}')
-        # logger.info(f'users considered in stats: {(lambda users: (user.id for user in users))}')
-        total_hours = 0
-        for user in users:
-            total_hours += user.salary.total_work_hours
-        if n_users == 0:
-            n_users = 1
-        return '{:.1f}'.format(float(total_hours/n_users))
-
-    def compute_avg_hourly_rate(self, users=None, n_users=1):
-        total_rate = 0
-        for user in users:
-            total_rate += user.salary.hourly_rate
-        if n_users == 0:
-            n_users = 1
-        return '{:.1f}'.format(float(total_rate/n_users))
-
-
-class EmployeesListView(ListView):
-    template_name = 'employees.html'
-    model = User
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        users = User.objects.filter(available=True).order_by('id')
-        context = {'users': users}
-        return context
-
-class ReportsListView(ListView):
-    template_name = 'reports.html'
-    model = Record
-    paginate_by = 3
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        records = Record.objects.filter(available=True).order_by('-obj_created_date')
-        context = {'reports': records}
-        return context
-
-
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = User.objects.filter(available=True).order_by('id')
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    # authentication_classes = [BaseAuthentication, TokenAuthentication]
+    queryset = User.objects.filter(available=True, is_approved=False).order_by('id')
+    serializer_class = NotApprovedUsersSerializer
+    action_serializers = {
+        'list': NotApprovedUsersSerializer,
+        'approve': UserApproveSerializer,
+    }
+    permission_classes = [permissions.AllowAny]
+
+    def get_serializer_class(self):
+        if hasattr(self, 'action_serializers'):
+            return self.action_serializers.get(self.action, self.serializer_class)
+        return super(UserViewSet, self).get_serializer_class()
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return User.objects.all(is_active=True)
+        return User.objects.filter(available=True, is_approved=False)
+
+    @action(detail=True, url_path='approve', name='approve', methods=['post'], permission_classes=[permissions.AllowAny], serializer_class=[UserApproveSerializer])
+    def approve(self, request):
+        serializer = UserApproveSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user = self.get_object()
+            if user:
+                user.is_approved = True
+                user.save()
+                return Response(data={'user': user.id, 'is_approved': user.is_apprvoed}, status=status.HTTP_200_OK)
+        return Response('Could not approve the user', status=status.HTTP_400_BAD_REQUEST)
+
 
     
 class RecordViewSet(viewsets.ModelViewSet):
@@ -110,7 +52,7 @@ class RecordViewSet(viewsets.ModelViewSet):
     """
     queryset = Record.objects.filter(available=True).order_by('obj_created_date')
     serializer_class = RecordSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

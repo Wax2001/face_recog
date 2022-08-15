@@ -5,8 +5,8 @@ from apps.processing.models import *
 
 class ImageInline(admin.StackedInline):
     model = Image
-    extra = 5
-    insert_after = 'role'
+    extra = 1
+    insert_after = 'is_approved'
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -15,6 +15,7 @@ class UserAdmin(admin.ModelAdmin):
         'username',
         'first_name',
         'last_name',
+        'is_approved',
         'available',
     )
     list_display_links = (
@@ -22,7 +23,7 @@ class UserAdmin(admin.ModelAdmin):
         'username',
     )
     
-    fields = ('username', 'first_name', 'last_name', 'email', 'role',)
+    fields = ('username', 'first_name', 'last_name', 'email', 'is_approved')
     inlines = [ImageInline,]
 
 @admin.register(Record)
@@ -47,7 +48,6 @@ class ImageAdmin(admin.ModelAdmin):
         'id',
         'user',
         'img',
-        'available',
     )
     list_display_links = (
         'id',

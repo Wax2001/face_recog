@@ -7,7 +7,6 @@ from apps.processing import publisher
 from apps.processing import logger
 
 from datetime import timedelta
-from django.db import transaction
 
 from rest_framework.authtoken.models import Token
 

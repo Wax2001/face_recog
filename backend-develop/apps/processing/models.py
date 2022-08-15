@@ -1,5 +1,3 @@
-from asyncio.log import logger
-from config import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator, MaxLengthValidator
@@ -12,6 +10,9 @@ class User(AbstractUser):
         max_length=80,
         blank=True,
         null=True
+    )
+    is_approved = models.BooleanField(
+        default=False
     )
     updated_at = models.DateTimeField(
         auto_now=True

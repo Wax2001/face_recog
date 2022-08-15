@@ -1,11 +1,20 @@
-from django.db.models import fields
-from apps.processing.models import *
+from apps.processing.models import User, Record
 from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'user_working_hours', 'user_salary', 'user_images')
+
+class NotApprovedUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'user_images')
+
+class UserApproveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('is_approved')
 
 
 class UserSigninSerializer(serializers.ModelSerializer):
