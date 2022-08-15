@@ -29,9 +29,11 @@ class UserViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return super(UserViewSet, self).get_serializer_class()
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return User.objects.all(is_active=True)
-        return User.objects.filter(available=True, is_approved=False)
+        users_with_images = []
+        for user in User.objects.filter(available=True, is_approved=False):
+            if user.images.exists():
+                users_with_images.append(user)
+        return users_with_images
 
     @action(detail=True, url_path='approve', name='approve', methods=['post'], permission_classes=[permissions.AllowAny], serializer_class=[UserApproveSerializer])
     def approve(self, request):
