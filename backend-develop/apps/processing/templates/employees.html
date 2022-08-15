@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Page Content -->
+    <div id="page-wrapper">
+        <div class="container-fluid">
+            <div class="row bg-title">
+                <div class="col-lg-12">
+                    <h4 class="page-title">List of all employees</h4>
+                    <ol class="breadcrumb">
+                        <li><a href="#">Employees</a></li>
+                    </ol>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="white-box">
+                        <h3>Employees</h3>
+                        <p class="text-muted">List of all available <code>employees</code></p>
+                        <div class="table-responsive message-center">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Full name</th>
+                                        <th>Work start at</th>
+                                        <th>Break time</th>
+                                        <th>Work ends at</th>
+                                        <th>Total Worked Hours</th>
+                                        <th>Hourly rate</th>
+                                        <th>Allowance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if users %}
+                                        {% for user in users %}
+                                            <tr>
+                                                <td>
+                                                    <a href="#">
+                                                        {{user.id}}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <div class="user-img">
+                                                        {% if user.user_image %}
+                                                            <img src="{{user.user_image.url}}" alt="user" style="height:33px;width:40px"> <span
+                                                            class="profile-status online pull-right"></span>            
+                                                        {% else %}
+                                                            <img src="{% static 'images/users/user-icon.png' %}" alt="user" class="img-circle"> <span
+                                                                class="profile-status online pull-right"></span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="mail-contnet">
+                                                        <h5>{{user.get_full_name}}</h5>
+                                                        {% if user.role %}
+                                                            <span class="mail-desc">{{user.role}}</span>
+                                                        {% else %}
+                                                            <span class="mail-desc">-</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                </td>
+                                                {% if user.working_hours.start_time %}
+                                                    <td>{{user.working_hours.start_time}}</td>
+                                                {% else %}
+                                                    <td>-</td>
+                                                {% endif %}
+
+                                                {% if user.working_hours.break_time_start %}
+                                                    <td>{{user.working_hours.break_time_start}}</td>
+                                                {% else %}
+                                                    <td>-</td>
+                                                {% endif %}
+
+                                                {% if user.working_hours.end_time %}
+                                                    <td>{{user.working_hours.end_time}}</td>
+                                                {% else %}
+                                                    <td>-</td>
+                                                {% endif %}
+
+                                                {% if user.salary.total_work_hours %}
+                                                    <td>{{user.salary.total_work_hours}} hrs.</td>
+                                                {% else %}
+                                                    <td>-</td>
+                                                {% endif %}
+
+                                                {% if user.salary.hourly_rate %}
+                                                    <td>{{user.salary.hourly_rate}}$</td>
+                                                {% else %}
+                                                    <td>-</td>
+                                                {% endif %}
+
+                                                {% if user.salary.allowance %}
+                                                    <td>{{user.salary.allowance}}%</td>
+                                                {% else %}
+                                                    <td>-</td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p>No employees available.</p>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+    <!-- /#page-wrapper -->
+{% endblock content %}

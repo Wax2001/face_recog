@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  db:
+    image: 'docker.io/bitnami/postgresql:latest'
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgresql_data:/bitnami/postgresql
+    env_file:
+      - .env
+    restart: on-failure
+    
+  web:
+    build: .
+    env_file:
+      - .env
+    command: gunicorn config.wsgi:application --bind=0.0.0.0:8000 --workers=${GUNICORN_WORKER_COUNT} --log-level=debug --access-logfile - --error-logfile -
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+      - "7070:7070"
+    restart: on-failure
+    depends_on:
+      - db
+
+  redis:
+    image: 'bitnami/redis:latest'
+    volumes:
+      - ./redis_data:/bitnami/redis/data
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379:6379'
+    env_file:
+      - .env
+    restart: on-failure
+
+  # mongodb:
+  #   image: 'bitnami/mongodb:latest'
+  #   ports:
+  #     - '27017:27017'
+  #   env_file: .env
+  #   volumes:
+  #     - . /mongodb_data:/bitnami/mongodb
+
+

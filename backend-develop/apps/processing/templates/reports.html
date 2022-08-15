@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+    <!-- Page Content -->
+    <div id="page-wrapper">
+        <div class="container-fluid">
+            <div class="row bg-title">
+                <div class="col-lg-12">
+                    <h4 class="page-title">Reports</h4>
+                    <ol class="breadcrumb">
+                        <li><a href="#">Employees attendance</a></li>
+                    </ol>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="white-box">
+                        <h3>Reports</h3>
+                        <p class="text-muted">List of all available <code>reports</code></p>
+                        <div class="table-responsive message-center">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Employee</th>
+                                        <th>Check in at</th>
+                                        <th>Check out at</th>
+                                        <th>Late arrive</th>
+                                        <th>Early leave</th>
+                                        <th>Created at</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if reports %}
+                                        {% for report in reports %}
+                                            <tr>
+                                                <td>
+                                                    <a href="#">
+                                                        {{report.id}}
+                                                    </a>
+                                                </td>
+                                                <td>{{report.user.get_full_name}}</td>
+                                                <td>{{report.check_in_time.time}}</td>
+                                                <td>{{report.check_out_time.time}}</td>
+                                                {% if report.late_arrive_time %}
+                                                    <td>{{report.late_arrive_time.time}} (-{{report.get_late_arrive_time | naturaltime}})</td>
+                                                {% else %}
+                                                    <td>-</td>
+                                                {% endif %}
+
+                                                {% if report.early_leave_time %}
+                                                    <td>{{report.early_leave_time.time}} (-{{report.get_early_leave_time | naturaltime}})</td>
+                                                {% else %}
+                                                    <td>-</td>
+                                                {% endif %}
+                                                
+                                                <td>{{report.obj_created_date}}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p>No records available.</p>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+
+                            <div class="pagination">
+                                <span class="step-links">
+                                    {% if reports.has_previous %}
+                                        <a href="?page=1">&laquo; first</a>
+                                        <a href="?page={{ reports.previous_page_number }}">previous</a>
+                                    {% endif %}
+                            
+                                    <span class="current">
+                                        Page {{ reports.number }} of {{ reports.paginator.num_pages }}.
+                                    </span>
+                            
+                                    {% if reports.has_next %}
+                                        <a href="?page={{ reports.next_page_number }}">next</a>
+                                        <a href="?page={{ reports.paginator.num_pages }}">last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+    <!-- /#page-wrapper -->
+{% endblock content %}
