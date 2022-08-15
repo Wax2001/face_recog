@@ -10,14 +10,14 @@ from datetime import timedelta
 
 from rest_framework.authtoken.models import Token
 
-@receiver(post_save, sender=Image)
-def send_new_photo(sender, instance, created, *args, **kwargs):
-    # send latest added Image instance
-    try:
-        logger.info(f'image sent to redis:\n{instance.user.id} {instance.img.url}')
-        publisher.rpush('redis-channel', f'{instance.user.id} {instance.img.url}')
-    except Exception as e:
-        logger.error(f'error on Image signal: {e}')
+# @receiver(post_save, sender=Image)
+# def send_new_photo(sender, instance, created, *args, **kwargs):
+#     # send latest added Image instance
+#     try:
+#         logger.info(f'image sent to redis:\n{instance.user.id} {instance.img.url}')
+#         publisher.rpush('redis-channel', f'{instance.user.id} {instance.img.url}')
+#     except Exception as e:
+#         logger.error(f'error on Image signal: {e}')
 
 @receiver(post_save, sender=Record)
 def process_total_hours(sender, instance, created, *args, **kwargs):
