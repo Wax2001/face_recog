@@ -4,7 +4,7 @@ from apps.processing.models import *
 from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework import permissions
-from apps.processing.serializers import RecordSerializer, UserApproveSerializer, NotApprovedUsersSerializer
+from apps.processing.serializers import RecordSerializer, UserApproveSerializer, NotApprovedUsersSerializer, UserUpdateSerializer
 
 from rest_framework.response import Response
 
@@ -19,7 +19,8 @@ class UserViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = NotApprovedUsersSerializer
     action_serializers = {
         'list': NotApprovedUsersSerializer,
-        'approve': UserApproveSerializer,
+        'update': UserUpdateSerializer,
+        'approve': UserApproveSerializer
     }
     permission_classes = [permissions.AllowAny]
 

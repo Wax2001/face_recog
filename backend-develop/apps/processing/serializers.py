@@ -6,6 +6,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'user_working_hours', 'user_salary', 'user_images')
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('is_approved')
+
 class NotApprovedUsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
