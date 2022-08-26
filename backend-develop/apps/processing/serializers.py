@@ -9,17 +9,19 @@ class UserSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('is_approved')
+        fields = ('id')
 
 class NotApprovedUsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'user_images')
 
-class UserApproveSerializer(serializers.ModelSerializer):
+class UserApproveSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    is_approved = serializers.BooleanField(default=True)
+
     class Meta:
-        model = User
-        fields = ('is_approved',)
+        fields = ('id', 'is_approved',)
 
 
 class UserSigninSerializer(serializers.ModelSerializer):

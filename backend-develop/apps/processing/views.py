@@ -36,15 +36,17 @@ class UserViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                 users_with_images.append(user)
         return users_with_images
 
-    @action(detail=True, url_path='approve', name='approve', methods=['post'], permission_classes=[permissions.AllowAny], serializer_class=[UserApproveSerializer])
+    @action(detail=False, url_path='approve', name='approve', methods=['POST'], permission_classes=[permissions.AllowAny], serializer_class=[UserApproveSerializer])
     def approve(self, request, *args, **kwargs):
         serializer = UserApproveSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            user = self.get_object()
+            print(serializer.data)
+            print(serializer.validated_data.get('id'))
+            user = User.objects.filter(id=serializer.validated_data.get('id')).first()
             if user:
                 user.is_approved = True
                 user.save()
-                return Response(data={'user': user.id, 'is_approved': user.is_apprvoed}, status=status.HTTP_200_OK)
+                return Response(data={'user': user.id, 'is_approved': user.is_approved}, status=status.HTTP_200_OK)
         return Response('Could not approve the user', status=status.HTTP_400_BAD_REQUEST)
 
 
