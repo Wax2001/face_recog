@@ -14,7 +14,7 @@ class NotApprovedUsersSerializer(serializers.ModelSerializer):
 class UserApproveSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('is_approved')
+        fields = ('is_approved',)
 
 
 class UserSigninSerializer(serializers.ModelSerializer):

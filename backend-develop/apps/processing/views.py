@@ -36,7 +36,7 @@ class UserViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return users_with_images
 
     @action(detail=True, url_path='approve', name='approve', methods=['post'], permission_classes=[permissions.AllowAny], serializer_class=[UserApproveSerializer])
-    def approve(self, request):
+    def approve(self, request, *args, **kwargs):
         serializer = UserApproveSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = self.get_object()
